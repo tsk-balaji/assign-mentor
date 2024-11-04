@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const StudentRouter = require("express").Router();
 const Mentor = require("../Mentors/mentors.model");
 const Student = require("./students.model");
@@ -23,6 +24,11 @@ StudentRouter.put("/:studentId/mentor", async (req, res) => {
     const { studentId } = req.params;
     const { mentorId } = req.body;
 
+    // Ensure mentorId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(mentorId)) {
+      return res.status(400).send({ message: "Invalid mentor ID." });
+    }
+
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).send("Student not found");
 
@@ -31,11 +37,17 @@ StudentRouter.put("/:studentId/mentor", async (req, res) => {
 
     // Store previous mentor ID before updating
     student.previousMentor = student.mentor;
-    student.mentor = mentorId;
+    student.mentor = mentorId; // Mongoose will automatically convert to ObjectId
     await student.save();
 
+    // Ensure students array exists in the mentor document
+    if (!newMentor.students) {
+      newMentor.students = []; // Initialize if undefined
+    }
+
     // Add student to new mentor's students array if not already present
-    if (!newMentor.students.includes(student._id)) {
+    if (!newMentor.students.includes(student._id.toString())) {
+      // Convert to string for comparison
       newMentor.students.push(student._id);
       await newMentor.save();
     }

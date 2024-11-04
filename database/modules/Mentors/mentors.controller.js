@@ -107,17 +107,6 @@ MentorRouter.post("/:mentorId/students", async (req, res) => {
 });
 
 // 5. Show all students for a particular mentor.
-// MentorRouter.get("/:mentorId/students", async (req, res) => {
-//   try {
-//     const { mentorId } = req.params;
-//     const mentor = await Mentor.findById(mentorId).populate("students");
-//     if (!mentor) return res.status(404).send("Mentor not found");
-
-//     res.send(mentor.students);
-//   } catch (error) {
-//     res.status(400).send({ message: "Error retrieving students", error });
-//   }
-// });
 
 MentorRouter.get("/:mentorId/students", async (req, res) => {
   try {
