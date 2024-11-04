@@ -94,7 +94,7 @@ StudentRouter.get("/", async (req, res) => {
     const students = await Student.find().exec();
     res.send(students);
   } catch (error) {
-    res.status(500).send({ message: "Error retrieving Students", error });
+    res.status(500).send({ message: "Error retrieving students", error });
   }
 });
 
