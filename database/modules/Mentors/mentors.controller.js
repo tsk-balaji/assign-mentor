@@ -25,6 +25,11 @@ MentorRouter.post("/:mentorId/students", async (req, res) => {
     const { mentorId } = req.params;
     const { studentIds } = req.body;
 
+    // Validate input
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).send({ message: "Student IDs array is required" });
+    }
+
     // Validate mentorId
     if (!mongoose.Types.ObjectId.isValid(mentorId)) {
       return res.status(400).send({ message: "Invalid mentor ID." });
@@ -49,6 +54,19 @@ MentorRouter.post("/:mentorId/students", async (req, res) => {
       (id) => new mongoose.Types.ObjectId(id)
     );
 
+    // Verify students exist
+    const existingStudents = await Student.find({
+      _id: { $in: studentObjectIds },
+    });
+
+    if (existingStudents.length !== studentIds.length) {
+      return res.status(404).send({
+        message: "Some student IDs do not exist",
+        providedCount: studentIds.length,
+        foundCount: existingStudents.length,
+      });
+    }
+
     // Find unassigned students
     const students = await Student.find({
       _id: { $in: studentObjectIds },
@@ -70,18 +88,18 @@ MentorRouter.post("/:mentorId/students", async (req, res) => {
     }
 
     // Assign the mentor
-    for (const student of students) {
-      student.mentor = mentorId;
-      await student.save();
-    }
+    await Student.updateMany(
+      { _id: { $in: studentObjectIds } },
+      { mentor: mentorId }
+    );
 
     mentor.students.push(...students.map((student) => student._id));
     await mentor.save();
 
-    res.send(mentor);
+    res.status(200).send(mentor);
   } catch (error) {
     console.error("Error assigning students:", error);
-    res.status(400).send({
+    res.status(500).send({
       message: "Error assigning students",
       error: error.message || "No details available",
     });
