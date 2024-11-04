@@ -88,4 +88,14 @@ StudentRouter.get("/:studentId/previous-mentor", async (req, res) => {
   }
 });
 
+// Get all Students
+StudentRouter.get("/", async (req, res) => {
+  try {
+    const students = await Student.find().exec();
+    res.send(students);
+  } catch (error) {
+    res.status(500).send({ message: "Error retrieving Students", error });
+  }
+});
+
 module.exports = StudentRouter;
