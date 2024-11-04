@@ -13,4 +13,4 @@ The complete API documentation is available in Postman:
 
 Below is a screenshot showing sample API logs:
 
-![API Logs](../assigning-mentor-student-DB/Log%20SS.png)
+![API Logs](Log%20SS.png)
